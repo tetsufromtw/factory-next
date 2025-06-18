@@ -2,6 +2,8 @@
 'use client';
 
 import { Employee } from '@/types/employee.types';
+import { on } from 'events';
+import {useRef} from 'react';
 
 interface EmployeeCardProps {
   employee: Employee;
@@ -12,6 +14,7 @@ interface EmployeeCardProps {
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
   onDragLeave: () => void;
+  onDoubleClick?: (employee: Employee, rect: DOMRect) => void;
 }
 
 export default function EmployeeCard({
@@ -22,7 +25,8 @@ export default function EmployeeCard({
   onDragEnd,
   onDragOver,
   onDrop,
-  onDragLeave
+  onDragLeave,
+  onDoubleClick
 }: EmployeeCardProps) {
   const getStatusDotClasses = () => {
     const statusColors = {
@@ -30,6 +34,7 @@ export default function EmployeeCard({
       'absent': 'bg-gray-400 shadow-gray-200',
       'busy': 'bg-red-500 shadow-red-200'
     };
+    const ref = useRef<HTMLDivElement>(null);
     
     const color = statusColors[employee.status] || statusColors['active'];
     return `w-2.5 h-2.5 rounded-full ${color} shadow-[0_0_0_3px]`;
@@ -43,6 +48,7 @@ export default function EmployeeCard({
     };
     return statusMap[employee.status] || '';
   };
+  const ref = useRef<HTMLDivElement>(null);
 
   return (
     <div 
@@ -55,6 +61,13 @@ export default function EmployeeCard({
       onDragOver={onDragOver}
       onDrop={onDrop}
       onDragLeave={onDragLeave}
+      ref = {ref}
+      onDoubleClick={()=>{
+        const rect = ref.current?.getBoundingClientRect();
+        if (rect && onDoubleClick) {
+          onDoubleClick(employee, rect);
+        }
+      }}
     >
       <div 
         className={`relative w-full h-full bg-white border-2 rounded-xl p-6 flex flex-col items-center justify-center gap-2 transition-all z-20 ${

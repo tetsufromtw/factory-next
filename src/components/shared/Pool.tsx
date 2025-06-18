@@ -4,6 +4,9 @@
 import { useState } from 'react';
 import { Pool as PoolType, DragDropData } from '@/types/pool.types';
 import EmployeeCard from './EmployeeCard';
+import { Employee } from '@/types/employee.types';
+import { select } from 'framer-motion/client';
+import EmployeeModal from './EmployeeModal';
 
 interface PoolProps {
   pool: PoolType;
@@ -15,6 +18,7 @@ interface PoolProps {
 
 export default function Pool({ pool, draggedData, onDragStart, onDragEnd, onDrop }: PoolProps) {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<{employee: Employee, rect: DOMRect} | null>(null);
 
   const isProductionPool = pool.type === 'production';
   
@@ -146,8 +150,13 @@ export default function Pool({ pool, draggedData, onDragStart, onDragEnd, onDrop
               onDragOver={(e) => handleDragOver(e, index)}
               onDrop={(e) => handleDrop(e, index)}
               onDragLeave={handleDragLeave}
+              onDoubleClick={(employee, rect) => setSelectedEmployee({ employee, rect })}
             />
           ))}
+          {selectedEmployee && (<EmployeeModal
+          employee={selectedEmployee.employee}
+          rect={selectedEmployee.rect}
+          onClose={() => setSelectedEmployee(null)}/>)}
 
           {getPlaceholders().map((_, index) => (
             <div 
